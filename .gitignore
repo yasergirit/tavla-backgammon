@@ -15,6 +15,7 @@ playwright-*.png
 test-results
 playwright-report
 .vercel
+supabase/.temp
 
 # Editor directories and files
 .vscode/*

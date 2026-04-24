@@ -1,73 +1,68 @@
-# React + TypeScript + Vite
+# Tavla Backgammon
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Premium casual browser backgammon built with React, TypeScript, Vite, Zustand, Tailwind CSS, Supabase Realtime, and Vercel.
 
-Currently, two official plugins are available:
+Live app: https://tavla-backgammon.vercel.app
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+GitHub repo: https://github.com/yasergirit/tavla-backgammon
 
-## React Compiler
+## Local Development
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
+npm run build
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Online Play Rooms
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Play Rooms use Supabase tables plus Postgres Realtime:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- `play_rooms`: room list and room status
+- `play_room_seats`: white/black seats, player identity, ready state
+- `online_games`: shared game state JSON for realtime turns
+
+The app falls back to local-only rooms when Supabase env vars are missing. To enable real online rooms, configure these variables:
+
+```bash
+VITE_SUPABASE_URL=https://your-project-ref.supabase.co
+VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
 ```
+
+## Supabase Setup
+
+Option 1, Dashboard:
+
+1. Open Supabase SQL Editor.
+2. Run `supabase/schema.sql`.
+3. Confirm Realtime is enabled for `play_rooms`, `play_room_seats`, and `online_games`.
+4. Copy Project URL and anon public key from Project Settings > API.
+5. Add both values to Vercel production env vars.
+
+Option 2, CLI:
+
+```bash
+supabase login
+supabase link --project-ref YOUR_PROJECT_REF
+supabase db push
+```
+
+Then add env vars to Vercel:
+
+```bash
+vercel env add VITE_SUPABASE_URL production
+vercel env add VITE_SUPABASE_ANON_KEY production
+vercel --prod
+```
+
+## Deployment
+
+The project is connected to Vercel project `tavla-backgammon`. Pushes to GitHub can be deployed by Vercel, and manual production deploys can be run with:
+
+```bash
+vercel --prod
+```
+
+## Security Note
+
+The current Play Rooms schema is an MVP anonymous multiplayer setup with permissive anon policies. Before larger public launch, move game validation server-side or tighten RLS so clients cannot update other rooms/games arbitrarily.
