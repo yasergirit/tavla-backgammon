@@ -319,9 +319,15 @@ function App() {
 
   const sitAtRoom = (roomId: string, seat: SeatColor) => {
     if (isSupabaseConfigured) {
-      void sitOnlineSeat(roomId, seat, playerId.current, playerName.current).catch((error) => {
-        setRoomsError(error instanceof Error ? error.message : 'Could not sit at this table.');
-      });
+      void (async () => {
+        try {
+          await sitOnlineSeat(roomId, seat, playerId.current, playerName.current);
+          setOnlineRooms(await fetchOnlineRooms());
+          setRoomsError(null);
+        } catch (error) {
+          setRoomsError(error instanceof Error ? error.message : 'Could not sit at this table.');
+        }
+      })();
       return;
     }
 
@@ -347,9 +353,15 @@ function App() {
 
   const leaveRoomSeat = (roomId: string, seat: SeatColor) => {
     if (isSupabaseConfigured) {
-      void leaveOnlineSeat(roomId, seat, playerId.current).catch((error) => {
-        setRoomsError(error instanceof Error ? error.message : 'Could not leave this seat.');
-      });
+      void (async () => {
+        try {
+          await leaveOnlineSeat(roomId, seat, playerId.current);
+          setOnlineRooms(await fetchOnlineRooms());
+          setRoomsError(null);
+        } catch (error) {
+          setRoomsError(error instanceof Error ? error.message : 'Could not leave this seat.');
+        }
+      })();
       return;
     }
 
@@ -372,9 +384,15 @@ function App() {
     if (isSupabaseConfigured) {
       const room = onlineRooms.find((onlineRoom) => onlineRoom.id === roomId);
       const nextReady = !room?.seats[seat].ready;
-      void setOnlineSeatReady(roomId, seat, playerId.current, nextReady).catch((error) => {
-        setRoomsError(error instanceof Error ? error.message : 'Could not update ready state.');
-      });
+      void (async () => {
+        try {
+          await setOnlineSeatReady(roomId, seat, playerId.current, nextReady);
+          setOnlineRooms(await fetchOnlineRooms());
+          setRoomsError(null);
+        } catch (error) {
+          setRoomsError(error instanceof Error ? error.message : 'Could not update ready state.');
+        }
+      })();
       return;
     }
 
